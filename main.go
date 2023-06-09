@@ -14,7 +14,7 @@ import (
 
 	"github.com/dustin/go-humanize"
 	"github.com/pyed/tailer"
-	"github.com/pyed/transmission"
+	"github.com/van-der-wolf/transmission"
 	"gopkg.in/telegram-bot-api.v4"
 )
 
@@ -105,14 +105,15 @@ const (
 var (
 
 	// flags
-	BotToken     string
-	Masters      masterSlice
-	RPCURL       string
-	Username     string
-	Password     string
-	LogFile      string
-	TransLogFile string // Transmission log file
-	NoLive       bool
+	DefaultDownloadDir string
+	BotToken           string
+	Masters            masterSlice
+	RPCURL             string
+	Username           string
+	Password           string
+	LogFile            string
+	TransLogFile       string // Transmission log file
+	NoLive             bool
 
 	// transmission
 	Client *transmission.TransmissionClient
@@ -169,6 +170,7 @@ func (masters masterSlice) Contains(master string) bool {
 // init flags
 func init() {
 	// define arguments and parse them.
+	flag.StringVar(&DefaultDownloadDir, "downloadDir", "", "Default download dir where all torrents will be placed")
 	flag.StringVar(&BotToken, "token", "", "Telegram bot token, Can be passed via environment variable 'TT_BOTT'")
 	flag.Var(&Masters, "master", "Your telegram handler, So the bot will only respond to you. Can specify more than one")
 	flag.StringVar(&RPCURL, "url", "http://localhost:9091/transmission/rpc", "Transmission RPC URL")
@@ -397,6 +399,9 @@ func main() {
 
 		case "version", "/version", "ver", "/ver":
 			go getVersion(update)
+
+		case "set-dir":
+			go setDownloadDir(update, tokens[1:])
 
 		case "":
 			// might be a file received
@@ -948,6 +953,29 @@ func trackers(ud tgbotapi.Update) {
 		return
 	}
 	send(buf.String(), ud.Message.Chat.ID, false)
+}
+
+func setDownloadDir(ud tgbotapi.Update, tokens []string) {
+	if len(tokens) < 2 {
+		send("*set-dir:* needs a new path", ud.Message.Chat.ID, false)
+		return
+	}
+	torrentID, err := strconv.Atoi(tokens[0])
+	if err != nil {
+		send(fmt.Sprintf("*info:* %s is not a number", tokens[0]), ud.Message.Chat.ID, false)
+		return
+	}
+	newPath := fmt.Sprintf("%s/%s", DefaultDownloadDir, tokens[1])
+	command := transmission.Command{Method: "torrent-set-location"}
+	command.Arguments.Location = newPath
+	command.Arguments.Move = true
+	command.Arguments.Ids = append(command.Arguments.Ids, torrentID)
+	_, err = Client.ExecuteCommand(&command)
+	if err != nil {
+		send("Failed to update", ud.Message.Chat.ID, false)
+	} else {
+		send("Updated", ud.Message.Chat.ID, false)
+	}
 }
 
 // add takes an URL to a .torrent file to add it to transmission

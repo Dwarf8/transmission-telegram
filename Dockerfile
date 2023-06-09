@@ -8,7 +8,7 @@ RUN apk add --no-cache git
 WORKDIR /go/src/transmission-telegram
 COPY . .
 
-RUN go mod init transmission-telegram
+#RUN go mod init transmission-telegram
 RUN go mod tidy
 RUN go get -d -v ./...
 RUN go install -v ./...
