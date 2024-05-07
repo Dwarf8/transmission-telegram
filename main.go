@@ -19,9 +19,9 @@ import (
 )
 
 const (
-	VERSION = "v1.4.3"
+	VERSION = "v1.4.4"
 
-	HELP = `
+	HELP_OLD = `
 	*list* or *li* or *ls*
 	Lists all the torrents, takes an optional argument which is a query to list only torrents that has a tracker matches the query, or some of it.
 
@@ -100,6 +100,11 @@ const (
 	- Prefix commands with '/' if you want to talk to your bot in a group. 
 	- report any issues [here](https://github.com/pyed/transmission-telegram)
 	`
+
+	HELP = `
+	Envia un archivo .torrent para que se descargue.
+ 	También puedes usar /add seguido de la url del torrent.
+        `
 )
 
 var (
@@ -409,7 +414,7 @@ func main() {
 
 		default:
 			// no such command, try help
-			go send("No such command, try /help", update.Message.Chat.ID, false)
+			// go send("No such command, try /help", update.Message.Chat.ID, false)
 
 		}
 	}
@@ -1001,7 +1006,7 @@ func add(ud tgbotapi.Update, tokens []string) {
 			send("*add:* error adding "+url, ud.Message.Chat.ID, false)
 			continue
 		}
-		send(fmt.Sprintf("*Added:* <%d> %s", torrent.ID, torrent.Name), ud.Message.Chat.ID, false)
+		send(fmt.Sprintf("*Descrgando:* <%d> %s", torrent.ID, torrent.Name), ud.Message.Chat.ID, false)
 
 		newPath := fmt.Sprintf("%s/%s", "/downloads/complete", "Extras")
 		command := transmission.Command{Method: "torrent-set-location"}
@@ -1010,9 +1015,7 @@ func add(ud tgbotapi.Update, tokens []string) {
 		command.Arguments.Ids = append(command.Arguments.Ids, torrent.ID)
 		_, err = Client.ExecuteCommand(&command)
 		if err != nil {
-			send("Failed to update", ud.Message.Chat.ID, false)
-		} else {
-			send("Updated", ud.Message.Chat.ID, false)
+			send("Algo salió mal y no va a bajarse en la crpeta Extras, revisarlo!", ud.Message.Chat.ID, false)
 		}
 		
 	}
