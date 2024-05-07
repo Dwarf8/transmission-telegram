@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	VERSION = "v1.4.2"
+	VERSION = "v1.4.3"
 
 	HELP = `
 	*list* or *li* or *ls*
@@ -987,9 +987,8 @@ func add(ud tgbotapi.Update, tokens []string) {
 
 	// loop over the URL/s and add them
 	for _, url := range tokens {
-		newPath := fmt.Sprintf("%s/%s", "/downloads/complete", "/Extras")
+
 		cmd := transmission.NewAddCmdByURL(url)
-		cmd.Arguments.Location = newPath
 
 		torrent, err := Client.ExecuteAddCommand(cmd)
 		if err != nil {
@@ -1003,6 +1002,19 @@ func add(ud tgbotapi.Update, tokens []string) {
 			continue
 		}
 		send(fmt.Sprintf("*Added:* <%d> %s", torrent.ID, torrent.Name), ud.Message.Chat.ID, false)
+
+		newPath := fmt.Sprintf("%s/%s", "/downloads/complete", "Extras")
+		command := transmission.Command{Method: "torrent-set-location"}
+		command.Arguments.Location = newPath
+		command.Arguments.Move = true
+		command.Arguments.Ids = append(command.Arguments.Ids, torrent.ID)
+		_, err = Client.ExecuteCommand(&command)
+		if err != nil {
+			send("Failed to update", ud.Message.Chat.ID, false)
+		} else {
+			send("Updated", ud.Message.Chat.ID, false)
+		}
+		
 	}
 }
 
