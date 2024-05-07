@@ -102,8 +102,7 @@ const (
 	`
 
 	HELP = `
-	Envia un archivo .torrent para que se descargue.
- 	También puedes usar /add seguido de la url del torrent.
+	Envía un archivo .torrent para que se descargue... También puedes usar /add seguido de la url del torrent... Creo que con Magnets también funcionaría...
         `
 )
 
@@ -1006,7 +1005,7 @@ func add(ud tgbotapi.Update, tokens []string) {
 			send("*add:* error adding "+url, ud.Message.Chat.ID, false)
 			continue
 		}
-		send(fmt.Sprintf("*Descrgando:* <%d> %s", torrent.ID, torrent.Name), ud.Message.Chat.ID, false)
+		send(fmt.Sprintf("*Descargando:* <%d> %s", torrent.ID, torrent.Name), ud.Message.Chat.ID, false)
 
 		newPath := fmt.Sprintf("%s/%s", "/downloads/complete", "Extras")
 		command := transmission.Command{Method: "torrent-set-location"}
