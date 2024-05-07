@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	VERSION = "v1.4.1"
+	VERSION = "v1.4.2"
 
 	HELP = `
 	*list* or *li* or *ls*
@@ -987,7 +987,9 @@ func add(ud tgbotapi.Update, tokens []string) {
 
 	// loop over the URL/s and add them
 	for _, url := range tokens {
+		newPath := fmt.Sprintf("%s/%s", "/downloads/complete", "/Extras")
 		cmd := transmission.NewAddCmdByURL(url)
+		cmd.Arguments.Location = newPath
 
 		torrent, err := Client.ExecuteAddCommand(cmd)
 		if err != nil {
