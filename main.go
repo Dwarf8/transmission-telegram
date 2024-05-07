@@ -170,7 +170,7 @@ func (masters masterSlice) Contains(master string) bool {
 // init flags
 func init() {
 	// define arguments and parse them.
-	flag.StringVar(&DefaultDownloadDir, "downloadDir", "", "Default download dir where all torrents will be placed")
+	flag.StringVar(&DefaultDownloadDir, "downloadDir", "/downloads/complete/Extras", "Default download dir where all torrents will be placed")
 	flag.StringVar(&BotToken, "token", "", "Telegram bot token, Can be passed via environment variable 'TT_BOTT'")
 	flag.Var(&Masters, "master", "Your telegram handler, So the bot will only respond to you. Can specify more than one")
 	flag.StringVar(&RPCURL, "url", "http://localhost:9091/transmission/rpc", "Transmission RPC URL")
